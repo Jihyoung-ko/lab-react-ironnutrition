@@ -44,27 +44,47 @@ class App extends Component {
   }
 
   addToTodayFood = (query) => {
-    const todayList = [...this.state.todayFoods]
-    const findTheFood = foods.filter(food => food.name.includes(query.name))
-    
-    const checkFood = todayList.some(food => food.name === query.name);
-    if (!checkFood) todayList.push(findTheFood[0])
-    // else change quantity, 
-    
-    const calSum = todayList.reduce((total, food) => total + food.calories * food.quantity, 0);
-    this.setState({
 
-      todayFoods:todayList,
-      todayFoodTotal: calSum
-    })
-    console.log(query.quantity);
+    const todayList = [...this.state.todayFoods]
+    const findTheFood = foods.find(food => food.name.includes(query.name))
+    const findTodayList = todayList.find(food => food.name.includes(query.name))
+
+    
+    if(findTheFood && !findTodayList){
+      todayList.push(query)
+      this.setState({
+        todayFoods:todayList,
+        todayFoodTotal: this.state.todayFoodTotal + query.calories
+
+      })
+    }else if(findTheFood && findTodayList){
+      const newTodayList = todayList.map(food => {
+        if(food.name.includes(query.name)){
+          return {
+            ...food,
+            quantity: food.quantity + query.quantity,
+            calories: food.calories + query.calories
+          }
+        }
+        return food
+      })
+      this.setState({
+        todayFoods:newTodayList,
+        todayFoodTotal: this.state.todayFoodTotal + query.calories
+
+      })
+    }
+
   }
 
   deleteHandler = (name) => {
     const todayList = [...this.state.todayFoods]
-    const remainingFood = todayList.filter(food => name !== food.name)
+    const remainingFood = todayList.filter(food => food.name !== name)
+    const removedFood = todayList.find(food => food.name.includes(name))
+    console.log('Delete', removedFood);
     this.setState({
-      todayList:remainingFood
+      todayFoods:remainingFood,
+      todayFoodTotal: this.state.todayFoodTotal - removedFood.calories
     })
   }
 
@@ -85,6 +105,7 @@ class App extends Component {
             {showAddFood && <AddFood addTheFood={this.addFoodHandler}/>}
             
             { foods.map((food, index) => {
+    
                 return (
                   <FoodBox key={index} {...food}  onAdd={this.addToTodayFood} />   
                 )
@@ -94,16 +115,19 @@ class App extends Component {
           </div>
           <div className="right mt-10 ml-20">
             <h1 className="text-3xl">Today's foods</h1>
-            <ul>
+            <ul className="m-6">
               {todayFoods.map(food => {
-                console.log(food);
                 return (
-                  <li>{food.quantity} {food.name} = {food.calories * food.quantity} cal <button onClick={()=>this.deleteHandler(food.name)}>x</button> </li>
+                  <div className="flex">
+                    <li className="list-disc">{food.quantity} {food.name} = {food.calories} cal</li>
+                    <button className="ml-4" onClick={()=>this.deleteHandler(food.name)}>X</button>
+                  </div>
+                  
                 )
               })
               }
             </ul>
-            <p className="font-bold">Total: {todayFoodTotal} cal</p>
+            <p className="font-bold ">Total: {todayFoodTotal} cal</p>
           </div>
 
         </div>

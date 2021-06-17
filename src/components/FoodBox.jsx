@@ -1,11 +1,32 @@
 import React, { Component } from 'react';
 
+
+
 class FoodBox extends Component {
+
+  constructor(props){
+     super(props);
+     this.state = {
+       foodQuantity: 1,
+       foodCalories: this.props.calories
+     }
+   }
   
-  addHandler = () => {
-    this.props.onAdd(this.props)
+  handleInput = (e) => {
+    this.setState({
+      foodQuantity: parseInt(e.target.value),
+      foodCalories: this.props.calories * parseInt(e.target.value),
+    })
   }
 
+  addHandler = () => {
+    const foodObject = {
+      ...this.props,
+      calories: this.state.foodCalories,
+      quantity: this.state.foodQuantity
+    }
+    this.props.onAdd(foodObject)
+  }
 
   render () {
     const { name, image, calories } = this.props;
@@ -19,7 +40,7 @@ class FoodBox extends Component {
           <p className="text-sm">{calories} cal</p>
         </div>        
         <div className="flex">
-          <input className="h-16 w-16 text-center" type="number" placeholder="1"  onChange={this.addHandler} />      
+          <input className="h-16 w-16 text-center" type="number" onChange={this.handleInput}  value={this.state.foodQuantity}  />      
           <button className="h-16 w-16 button-container" onClick={this.addHandler} > + </button>          
         </div>
       </div>
